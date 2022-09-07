@@ -1,0 +1,46 @@
+{% load static %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<h1>Sorting Visualizer</h1>
+
+<div class="list-container rounded" style="text-align: center; display: flex; margin: 0 auto; justify-content: center; background-color: black; transform: rotate(180deg); transform: scaleY(-1);">
+    {% for i in list %}
+    <div class="list-bars" style="height:{{ i }}px; background-color: #fafa68; width: 10px; margin: 1.5px; margin-top: 0px; border-radius: 0px 0px 3px 3px;" ></div>
+    {% endfor %}
+</div>
+
+<script>
+const TIME = 5;
+const PRIMARY_COLOR = '#fafa68';
+const SECONDARY_COLOR = '#9381ff';
+
+    $.ajax({
+    type: "POST",
+    url: '{{ '/displayMergesort/' }}',
+    data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+    success: function callback(animations){
+                var list = JSON.parse(animations);
+
+                for (let i = 0; i < list.length; i++) {
+                    const listBars = document.getElementsByClassName('list-bars');
+                    const isColorChange = i % 3 !== 2;
+                    if (isColorChange) {
+                        const [barOneIdx, barTwoIdx] = list[i];
+                        const barOneStyle = listBars[barOneIdx].style;
+                        const barTwoStyle = listBars[barTwoIdx].style;
+                        const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
+                        setTimeout(() => {
+                            barOneStyle.backgroundColor = color;
+                            barTwoStyle.backgroundColor = color;
+                        }, i * TIME);
+                    } else {
+                    setTimeout(() => {
+                        const [barOneIdx, newHeight] = list[i];
+                        const barOneStyle = listBars[barOneIdx].style;
+                        barOneStyle.height = `${newHeight}px`;
+                        }, i * TIME);
+                    }
+                    }
+                }
+    });
+
+</script>
